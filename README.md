@@ -17,7 +17,7 @@ How to Run:
     source .venv/bin/activate
 
     After activating:
-        pip -r install requirements.txt 
+        pip install -r requirements.txt 
     
     Start the server:
         uvicorn app.main:app --reload
