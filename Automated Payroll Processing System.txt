@@ -1,0 +1,49 @@
+BACKEND MACHINE CODING ROUND 
+Automated Payroll Processing System 
+Scenario-based practical assessment | Recommended duration: 3 hours | Level: Advanced fresher 
+1. Business scenario 
+Your organization processes monthly payroll for up to 50,000 employees. HR uploads a CSV file containing attendance and salary information. Payroll calculation can take several minutes, so the HTTP request must return quickly while a background worker processes the file. HR must be able to check progress and download the final results. 
+2. Required technology 
+Choose: Python with Django/Django REST Framework or FastAPI; Celery for background tasks; Redis as message broker; PostgreSQL (preferred) or another relational database. A simple API-only application is sufficient; a frontend is not required. 
+3. Mandatory features 
+• Accept a CSV upload, validate its file type and required columns, save it, create a payroll job, and return HTTP 202 with a job ID without performing payroll calculation inside the request. 
+• Queue a Celery task to process uploaded records asynchronously. 
+• Calculate payroll per valid employee record and persist results. Use decimal-safe monetary arithmetic and round to two decimal places. 
+• Provide a job status endpoint with status, total rows, processed rows, success count, failed count, and error summary. 
+• Validate each row; retain row-level errors and continue processing other valid rows. 
+• Prevent duplicate payroll results for the same employee and payroll month. Define and document the behavior when the same file is uploaded twice. 
+• Generate a downloadable CSV containing successful payroll calculations. 
+4. Salary calculation rules 
+For this assessment, use the following simplified formula (these are exercise rules, not statutory payroll or tax rules): 
+Net salary = (monthly_salary x present_days / working_days) + bonus 
+Assume no tax, PF, or other deductions. Reject invalid values: negative salary/bonus, working_days less than or equal to zero, negative present_days, or present_days greater than working_days. The uploaded file must also specify a payroll_month in YYYY-MM format, either as a request field or a CSV column. 
+5. Sample input 
+employee_id,name,monthly_salary,working_days,present_days,bonus
+Automated Payroll Processing | Machine Coding Round 1 
+E101,Rahul,60000,22,20,5000 
+E102,Priya,80000,22,22,10000 
+E103,Amit,45000,22,18,2000 
+E104,Neha,70000,22,21,3000 
+6. Expected API contract 
+Method Endpoint Expected behavior 
+POST /payroll/upload Upload CSV and payroll_month; return 202 with job_id GET /payroll/jobs/{job_id} Return job state and progress counters GET /payroll/jobs/{job_id}/results Return calculated rows and row errors GET /payroll/jobs/{job_id}/download Download result CSV when ready 
+7. Processing states 
+Use a clear state model, for example: PENDING -> PROCESSING -> COMPLETED / PARTIAL / FAILED. PARTIAL means some rows succeeded and others failed validation. Document how a job moves between states and when a download is available. 
+8. Bonus engineering challenges 
+• Add a retry endpoint for a failed job without duplicating completed payroll rows. • Demonstrate safe behavior when a worker crashes halfway through a file. 
+• Process a large CSV in batches or streaming fashion rather than loading the entire file into memory. • Use Celery Beat to schedule a monthly payroll task; make repeat runs safe. 
+• Write automated tests for duplicate uploads, malformed rows, and worker retries. 9. Live change requests (interviewer may introduce) 
+Scenario What the implementation should address 
+Same file uploaded twice Duplicate job/result prevention or explicit reuse policy Worker stops after 40% Recovery/retry without duplicate payroll entries One invalid row among 5,000 Continue valid rows and expose row-level errors Two workers process overlapping records Database constraints and concurrency-safe writes 
+10. Submission requirements 
+• Source code with a README containing setup and run instructions.
+Automated Payroll Processing | Machine Coding Round 2 
+• Database schema or migrations and dependency manifest. 
+• Instructions to start API, Redis, Celery worker, and (if implemented) Celery Beat. • Sample request/response and a sample CSV. 
+• At least a few automated tests and a short explanation of failure-handling decisions. 11. Assessment rubric (100 points) 
+Evaluation area Points API design and validation 15 Celery + Redis background processing 25 Data model and salary correctness 15 Error handling and retries 15 Idempotency and concurrency 15 Code quality and tests 10 Design explanation 5 
+12. Suggested time allocation 
+45 min: API + data model | 60 min: Celery worker + payroll logic | 45 min: errors, idempotency and retry | 30 min: testing, demo and explanation. 
+Interviewer note 
+Provide a working Redis/PostgreSQL environment or Docker Compose starter if setup time should not be assessed. Grade the mandatory scope first; treat scheduling, crash recovery, and advanced concurrency as stretch goals. Do not require a production-grade distributed system from a fresher in three hours.
+Automated Payroll Processing | Machine Coding Round 3 
